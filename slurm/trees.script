@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J no-sub_%j
+#SBATCH -J trees
 
 # Request 1 CPU core
 #SBATCH -n 1
