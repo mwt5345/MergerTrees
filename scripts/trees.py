@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ytree
 
-
 # Array to hold main prog. mass history
 M_hist = []
 # Hold redshift history
@@ -70,4 +69,4 @@ plt.xlabel(r'$10^{12}$ M$_\odot$')
 plt.ylabel('# halos')
 
 plt.tight_layout()
-plt.savefig('../figures/mass-ev.pdf')
+plt.savefig('../figures/mass-ev')

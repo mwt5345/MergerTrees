@@ -8,7 +8,7 @@
 #SBATCH --mem=5G
 
 #SBATCH -t 00:10:00
-#SBATCH -o z-outfiles/tree-o.out
-#SBATCH -e z-outfiles/tree-e.out
+#SBATCH -o ../z-outfiles/tree-o.out
+#SBATCH -e ../z-outfiles/tree-e.out
 
-python3 -u trees.py
+python3 -u ../scripts/trees.py
