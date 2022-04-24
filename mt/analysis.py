@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import ytree
 
@@ -14,10 +16,12 @@ class MT_Analysis(object):
         self.hubble_constant = hubble_constant
         self.omega_matter = omega_matter
         self.omega_lambda = omega_lambda
+        # to change units in some calculations
+        self.norm = None
         
         self.forest = None
-        self.merger_hist = []
-        self.merger_hist_z = []
+        self.merger_history = []
+        self.merger_history_z = []
 
     """
         filter_trees - basic function which filters trees by a desired property
@@ -29,6 +33,7 @@ class MT_Analysis(object):
 
     """
     def fell_trees(self,ftype="mass",norm=1e12,upperb=1.1,lowerb=1.1):
+        self.norm = norm
         to_filter = self.forest[ftype].value/norm
         # Find halos with masses consistent with the MW
         tree_id = np.where((to_filter > 0.9) & (to_filter < 1.1))[0]
@@ -53,7 +58,7 @@ class MT_Analysis(object):
     """
         merger_history - from current forest get the merger history 
     """
-    def merger_history(self,ftype="mass"):
+    def get_merger_history(self,ftype="mass",calc_average=False):
         if self.forest == None:
             self.load_forest()
 
@@ -61,14 +66,35 @@ class MT_Analysis(object):
             prog_hist = tree["prog",ftype].value
             prog_z    = tree["prog","redshift"]
 
-            print(prog_hist/1e12)
-
             # Temporary hack, will fix
             ### Many things to fix here
             if len(prog_z) > 100:
-                self.merger_hist.append(prog_hist[:100]/M0[tree]/1e12)
-                self.merger_hist_z.append(prog_z[:100])
+                self.merger_history.append(prog_hist[:100]/prog_hist[0])
+                self.merger_history_z.append(prog_z[:100])
 
+        self.merger_history = np.array(self.merger_history)
+        self.merger_history_z = np.array(self.merger_history_z)[0]
+
+        if calc_average == True:
+            self.merger_history_median = np.median(self.merger_history,axis=0)
+            self.merger_history_95_l = np.percentile(self.merger_history,5,axis=0)
+            self.merger_history_95_u = np.percentile(self.merger_history,95,axis=0)
+            self.merger_history_68_l = np.percentile(self.merger_history,32,axis=0)
+            self.merger_history_68_u = np.percentile(self.merger_history,68,axis=0)
+
+    def plot_merger_history(self,loc='../figures/mass-ev'):
+        plt.figure(figsize=(5,5))
+        plt.fill_between(self.merger_history_z,self.merger_history_95_l,self.merger_history_95_u, alpha=0.5,facecolor='aquamarine',edgecolor='k',label=r'95%')
+        plt.fill_between(self.merger_history_z,self.merger_history_68_l,self.merger_history_68_u,
+                        alpha=0.95,facecolor='aquamarine',edgecolor='k',label=r'68%')
+        plt.plot(self.merger_history_z,self.merger_history_median,ls='--',c='k')
+        plt.ylabel('M(z)/M(z = 0)')
+        plt.xlabel('z')
+        plt.xlim([np.min(self.merger_history_z),np.max(self.merger_history_z)])
+        plt.yscale('log')
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(loc)
 
 if __name__ == "__main__":
 
@@ -84,6 +110,7 @@ if __name__ == "__main__":
     mta.fell_trees()
     
     # find merger history
-    mta.merger_history()
+    mta.get_merger_history(calc_average=True)
 
-
+    # plot the merger history
+    mta.plot_merger_history()
