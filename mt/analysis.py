@@ -16,6 +16,8 @@ class MT_Analysis(object):
         self.omega_lambda = omega_lambda
         
         self.forest = None
+        self.merger_hist = []
+        self.merger_hist_z = []
 
     """
         filter_trees - basic function which filters trees by a desired property
@@ -47,7 +49,29 @@ class MT_Analysis(object):
 
         self.forest.add_alias_field("mass", "Group_M_TopHat200", units="Msun")
 
+
+    """
+        merger_history - from current forest get the merger history 
+    """
+    def merger_history(self,ftype="mass"):
+        if self.forest == None:
+            self.load_forest()
+
+        for tree in self.forest:
+            prog_hist = tree["prog",ftype].value
+            prog_z    = tree["prog","redshift"]
+
+            print(prog_hist/1e12)
+
+            # Temporary hack, will fix
+            ### Many things to fix here
+            if len(prog_z) > 100:
+                self.merger_hist.append(prog_hist[:100]/M0[tree]/1e12)
+                self.merger_hist_z.append(prog_z[:100])
+
+
 if __name__ == "__main__":
+
     file_path = '/users/mtoomey/scratch/savvas_project/merger_tree/trees_sf1_135.0.hdf5'
 
     # create analysis instance
@@ -59,5 +83,7 @@ if __name__ == "__main__":
     # filter trees
     mta.fell_trees()
     
+    # find merger history
+    mta.merger_history()
 
 
