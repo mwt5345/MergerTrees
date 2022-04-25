@@ -32,11 +32,11 @@ class MT_Analysis(object):
             :param lowerb:  float for lower bound in norm units
 
     """
-    def fell_trees(self,ftype="mass",norm=1e12,upperb=1.1,lowerb=1.1):
+    def fell_trees(self,ftype="mass",norm=1e12,upperb=1.1,lowerb=0.9):
         self.norm = norm
         to_filter = self.forest[ftype].value/norm
         # Find halos with masses consistent with the MW
-        tree_id = np.where((to_filter > 0.9) & (to_filter < 1.1))[0]
+        tree_id = np.where((to_filter > lowerb) & (to_filter < upperb))[0]
         self.forest = self.forest[tree_id] 
         print(len(tree_id),' trees after filtering.')
 
