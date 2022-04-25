@@ -129,6 +129,7 @@ class MT_Analysis(object):
         plt.figure(figsize=(5,5))
         plt.hist(dist,bins=np.logspace(8,10,50))
         plt.xscale('log')
+        plt.xlabel(r'M$_\odot$')
         plt.savefig('../figures/leaf_mass_dist')
 
 
