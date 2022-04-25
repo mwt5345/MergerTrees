@@ -10,7 +10,7 @@ First install [yt](https://github.com/yt-project/yt) and [ytree](https://github.
 
 ```console
 foo@bar:~$ git clone https://github.com/mwt5345/MergerTrees.git
-foo@bar:~$ cd SWAGgy
+foo@bar:~$ cd MergerTrees
 foo@bar:~/SWAGgy$ python setup.py install
 ```
 ## Examples
