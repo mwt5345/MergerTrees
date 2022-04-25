@@ -56,7 +56,7 @@ class MT_Analysis(object):
 
 
     """
-        merger_history - from current forest get the merger history 
+        get_merger_history - from current forest get the merger history 
     """
     def get_merger_history(self,ftype="mass",calc_average=False):
         if self.forest == None:
@@ -84,9 +84,12 @@ class MT_Analysis(object):
 
     def plot_merger_history(self,loc='../figures/mass-ev'):
         plt.figure(figsize=(5,5))
-        plt.fill_between(self.merger_history_z,self.merger_history_95_l,self.merger_history_95_u, alpha=0.5,facecolor='aquamarine',edgecolor='k',label=r'95%')
-        plt.fill_between(self.merger_history_z,self.merger_history_68_l,self.merger_history_68_u,
-                        alpha=0.95,facecolor='aquamarine',edgecolor='k',label=r'68%')
+        plt.fill_between(self.merger_history_z,self.merger_history_95_l,
+                         self.merger_history_95_u, alpha=0.5,facecolor='aquamarine',
+                         edgecolor='k',label=r'95%')
+        plt.fill_between(self.merger_history_z,self.merger_history_68_l,
+                         self.merger_history_68_u,alpha=0.95,facecolor='aquamarine',
+                         edgecolor='k',label=r'68%')
         plt.plot(self.merger_history_z,self.merger_history_median,ls='--',c='k')
         plt.ylabel('M(z)/M(z = 0)')
         plt.xlabel('z')
@@ -95,6 +98,39 @@ class MT_Analysis(object):
         plt.legend()
         plt.tight_layout()
         plt.savefig(loc)
+
+
+    def plot_inv_merger_history(self,num_trees=5,loc='../figures/mass-ev-indv'):
+        plt.figure(figsize=(5,5))
+        # Grab a few trees and plot progentior evolution invidually
+        for tree_hist in self.merger_history[:num_trees]:
+            # TODO: For some reason some progenitors have M/M0 = 0. Temp. ignoring these
+            keep = np.where(tree_hist>0)
+            plt.plot(self.merger_history_z[keep],tree_hist[keep])
+        plt.plot(self.merger_history_z,self.merger_history_median,ls='--',c='k',label='Median')
+        plt.ylabel('M(z)/M(z = 0)')
+        plt.xlabel('z')
+        plt.xlim([np.min(self.merger_history_z),np.max(self.merger_history_z)])
+        plt.yscale('log')
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(loc)
+
+
+    def plot_leaf_mass_dist(self):
+        dist = []
+        # grab each tree from the forest
+        for tree in self.forest:
+            # go through the leaves and append mass to list, don't add any 0s
+            for leaf in tree.get_leaf_nodes():
+                if leaf["mass"].value > 0:
+                    dist.append(leaf["mass"].value)
+        dist = np.array(dist)
+        plt.figure(figsize=(5,5))
+        plt.hist(dist,bins=np.logspace(8,10,50))
+        plt.xscale('log')
+        plt.savefig('../figures/leaf_mass_dist')
+
 
 if __name__ == "__main__":
 
@@ -108,9 +144,6 @@ if __name__ == "__main__":
 
     # filter trees
     mta.fell_trees()
-    
-    # find merger history
-    mta.get_merger_history(calc_average=True)
-
-    # plot the merger history
-    mta.plot_merger_history()
+   
+    # find dist of leaves
+    mta.plot_leaf_mass_dist() 
